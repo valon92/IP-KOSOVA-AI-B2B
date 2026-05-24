@@ -34,9 +34,24 @@ npm run dev
 php artisan serve
 ```
 
-Open **http://127.0.0.1:8000/dashboard**
+Open **http://127.0.0.1:8000/login** (ose `/dashboard` pas hyrjes)
 
-Demo API key: `ipko_demo_key_for_mvp_development` (set in `.env` as `IPKO_DEMO_API_KEY`)
+### Hyrje në dashboard (sesion)
+
+| Fusha | Vlera demo |
+|-------|------------|
+| Email | `demo@ipko.ai` |
+| Fjalëkalimi | `ipko-demo-2026` |
+
+Dashboard përdor **cookie sesioni** (Sanctum stateful), jo API key në frontend. API key mbetet vetëm për **tracking** (`ipko-tracker.js`).
+
+Demo API key (tracking): `ipko_demo_key_for_mvp_development` (set in `.env` as `IPKO_DEMO_API_KEY`)
+
+Në `.env` shtoni (për portin e dev server-it):
+
+```
+SANCTUM_STATEFUL_DOMAINS=localhost,localhost:8090,127.0.0.1,127.0.0.1:8090
+```
 
 ## Tracking Snippet
 
@@ -58,9 +73,16 @@ The script captures URL, referrer, device type, screen resolution, and sends asy
 | Method | Endpoint | Auth |
 |--------|----------|------|
 | POST | `/api/v1/track` | `X-Api-Key` header or `api_key` body |
-| GET | `/api/v1/dashboard/metrics` | `X-Api-Key` |
-| GET | `/api/v1/dashboard/live-feed` | `X-Api-Key` |
-| GET | `/api/v1/dashboard/companies` | `X-Api-Key` |
+| POST | `/login` | — (krijon sesion) |
+| POST | `/logout` | sesion klienti |
+| GET | `/api/v1/auth/me` | sesion klienti |
+| GET | `/api/v1/dashboard/metrics` | sesion klienti |
+| GET | `/api/v1/dashboard/live-feed` | sesion klienti |
+| GET | `/api/v1/dashboard/business-leads` | sesion klienti |
+| GET | `/api/v1/dashboard/companies` | sesion klienti (alias) |
+| GET | `/api/v1/businesses` | sesion klienti |
+| GET | `/api/v1/businesses/{id}` | sesion klienti |
+| GET | `/api/v1/industries` | publik |
 
 ### Track payload
 
@@ -88,9 +110,17 @@ Scores (0–100) combine:
 
 Status: **hot** (>75), **medium** (40–75), **cold** (<40)
 
-## Kosovo Corporate IP Directory
+## Business Domain (Database)
 
-Seeded companies include NLB Banka HQ, Albi Mall, Ministria e Financave, Balfin Group, IPKO Telecommunications, and more. Local development maps `127.0.0.x` to **IPKO Demo Corp**.
+| Table | Purpose |
+|-------|---------|
+| `industries` | Sektoret ekonomik (Banking, Retail, …) |
+| `businesses` | Profile B2B (emër, qytet, industri, madhësi) |
+| `business_ip_ranges` | IP ranges për identifikim (HQ, degë) |
+| `client_business_leads` | Lead i identifikuar për çdo klient + business + IP |
+| `page_views` | Ngjarjet e tracking-ut |
+
+Seeded businesses: NLB, Albi Mall, Ministria e Financave, Balfin, IPKO Telecom, etj. `127.0.0.x` → **IPKO Demo Corp**.
 
 ## Production Notes
 

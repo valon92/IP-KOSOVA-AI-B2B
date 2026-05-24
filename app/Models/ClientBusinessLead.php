@@ -2,20 +2,24 @@
 
 namespace App\Models;
 
+use App\Enums\LeadStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class IdentifiedLead extends Model
+class ClientBusinessLead extends Model
 {
+    protected $table = 'client_business_leads';
+
     protected $fillable = [
         'client_id',
-        'company_id',
+        'business_id',
         'ip_address',
         'lead_score',
         'status',
         'total_time_spent',
         'visit_count',
         'pages_visited',
+        'first_seen_at',
         'last_active_at',
     ];
 
@@ -24,6 +28,7 @@ class IdentifiedLead extends Model
         'total_time_spent' => 'integer',
         'visit_count' => 'integer',
         'pages_visited' => 'array',
+        'first_seen_at' => 'datetime',
         'last_active_at' => 'datetime',
     ];
 
@@ -32,21 +37,13 @@ class IdentifiedLead extends Model
         return $this->belongsTo(Client::class);
     }
 
-    public function company(): BelongsTo
+    public function business(): BelongsTo
     {
-        return $this->belongsTo(CompanyDirectory::class, 'company_id');
+        return $this->belongsTo(Business::class);
     }
 
-    public static function scoreToStatus(int $score): string
+    public static function statusFromScore(int $score): string
     {
-        if ($score > 75) {
-            return 'hot';
-        }
-
-        if ($score >= 40) {
-            return 'medium';
-        }
-
-        return 'cold';
+        return LeadStatus::fromScore($score)->value;
     }
 }

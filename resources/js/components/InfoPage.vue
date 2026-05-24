@@ -1,6 +1,7 @@
 <script setup>
 import AppHeader from './AppHeader.vue';
 import AppFooter from './AppFooter.vue';
+import ScrollToTop from './ScrollToTop.vue';
 
 const steps = [
     {
@@ -26,12 +27,12 @@ const steps = [
     {
         step: 'E',
         title: 'Enrichment — Identifikimi',
-        desc: 'IP-ja krahasohet me companies_directory: NLB, Albi Mall, ministri, banka, retail etj. Në vend të ISP-së gjenerike, shihni emrin e kompanisë.',
+        desc: 'IP-ja krahasohet me Business Registry (industries + business_ip_ranges): NLB, Albi Mall, ministri, banka, retail etj.',
     },
     {
         step: 'F',
         title: 'Regjistrimi i Page View',
-        desc: 'Çdo vizitë ruhet në page_views me session_id, url_path, duration dhe company_id (nëse u identifikua).',
+        desc: 'Çdo vizitë ruhet në page_views me session_id, url_path, duration dhe business_id (nëse u identifikua).',
     },
     {
         step: 'G',
@@ -46,7 +47,7 @@ const steps = [
     {
         step: 'I',
         title: 'Identified Leads',
-        desc: 'Për çdo kombinim client + company + IP krijohet ose përditësohet një lead me status: hot, medium, cold.',
+        desc: 'Për çdo kombinim client + business + IP krijohet client_business_lead me status: hot, medium, cold.',
     },
     {
         step: 'J',
@@ -61,7 +62,7 @@ const steps = [
     {
         step: 'L',
         title: 'API & integrime',
-        desc: 'Përdorni REST API me X-Api-Key për metrics, live-feed dhe companies — lidhni me CRM, Slack ose email alerts.',
+        desc: 'Përdorni REST API: /businesses, /industries, /dashboard/business-leads — lidhni me CRM ose Slack.',
     },
 ];
 
@@ -199,6 +200,27 @@ const scoreRules = [
                 </ol>
             </section>
 
+            <!-- Business registration -->
+            <section id="register-business" class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+                <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Regjistrimi i biznesit</h2>
+                <p class="mt-2 max-w-2xl text-slate-600 dark:text-slate-400">
+                    Çdo kompani B2B në Kosovë mund të shtohet në regjistrin IPKO.ai me intervalin IP të zyrës.
+                    Pas verifikimit, vizitorët nga ai rrjet identifikohen automatikisht.
+                </p>
+                <ol class="mt-6 list-inside list-decimal space-y-2 text-sm text-slate-600 dark:text-slate-400">
+                    <li>Hapni <a href="/register-business" class="font-medium text-ipko-600 hover:underline dark:text-ipko-400">/register-business</a></li>
+                    <li>Plotësoni emrin, sektorin, qytetin dhe intervalin IP (fillim–fund)</li>
+                    <li>Dërgoni formularin — API: <code class="rounded bg-slate-200 px-1 text-xs dark:bg-slate-800">POST /api/v1/businesses/register</code></li>
+                    <li>Nëse <code class="text-xs">IPKO_AUTO_VERIFY_BUSINESSES=true</code>, biznesi aktivizohet menjëherë; përndryshe pritet verifikimi</li>
+                </ol>
+                <a
+                    href="/register-business"
+                    class="mt-6 inline-flex rounded-xl border border-ipko-200 bg-ipko-50 px-5 py-2.5 text-sm font-semibold text-ipko-700 transition hover:bg-ipko-100 dark:border-ipko-800 dark:bg-ipko-950 dark:text-ipko-300"
+                >
+                    Regjistro biznesin tani →
+                </a>
+            </section>
+
             <!-- Tracking snippet -->
             <section id="tracking-sdk" class="border-t border-slate-200/80 bg-slate-100/50 py-12 dark:border-slate-800 dark:bg-slate-900/20">
                 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -276,8 +298,18 @@ const scoreRules = [
                                 </tr>
                                 <tr>
                                     <td class="px-4 py-3 font-mono text-ipko-600">GET</td>
-                                    <td class="px-4 py-3 font-mono text-xs">/api/v1/dashboard/companies</td>
-                                    <td class="px-4 py-3 text-slate-600 dark:text-slate-400">Tabela e kompanive</td>
+                                    <td class="px-4 py-3 font-mono text-xs">/api/v1/dashboard/business-leads</td>
+                                    <td class="px-4 py-3 text-slate-600 dark:text-slate-400">Leads B2B të identifikuara</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-4 py-3 font-mono text-ipko-600">GET</td>
+                                    <td class="px-4 py-3 font-mono text-xs">/api/v1/businesses</td>
+                                    <td class="px-4 py-3 text-slate-600 dark:text-slate-400">Regjistri i bizneseve</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-4 py-3 font-mono text-ipko-600">GET</td>
+                                    <td class="px-4 py-3 font-mono text-xs">/api/v1/industries</td>
+                                    <td class="px-4 py-3 text-slate-600 dark:text-slate-400">Sektoret ekonomik</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -303,5 +335,6 @@ const scoreRules = [
         </main>
 
         <AppFooter />
+        <ScrollToTop />
     </div>
 </template>

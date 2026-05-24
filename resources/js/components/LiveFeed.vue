@@ -43,9 +43,11 @@ function statusDot(status) {
                 >
                     <span class="h-2.5 w-2.5 shrink-0 rounded-full" :class="statusDot(item.status)" />
                     <div class="min-w-0 flex-1">
-                        <p class="truncate font-medium text-slate-900 dark:text-white">{{ item.company_name }}</p>
+                        <p class="truncate font-medium text-slate-900 dark:text-white">
+                            {{ item.business?.name ?? item.company_name }}
+                        </p>
                         <p class="truncate text-xs text-slate-500">
-                            {{ item.industry }} · {{ item.current_page }}
+                            {{ item.business?.industry?.name ?? item.industry }} · {{ item.current_page }}
                         </p>
                     </div>
                     <div class="shrink-0 text-right">

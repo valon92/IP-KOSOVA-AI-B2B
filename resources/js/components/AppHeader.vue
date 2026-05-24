@@ -1,14 +1,18 @@
 <script setup>
 import { ref, onMounted } from 'vue';
+import api from '../api/client';
 
 defineProps({
     active: {
         type: String,
         default: 'dashboard',
     },
+    showSession: { type: Boolean, default: false },
 });
 
 const darkMode = ref(false);
+const sessionUser = ref(null);
+const loggingOut = ref(false);
 
 function toggleDarkMode() {
     darkMode.value = !darkMode.value;
@@ -16,11 +20,40 @@ function toggleDarkMode() {
     localStorage.setItem('ipko_dark_mode', darkMode.value ? '1' : '0');
 }
 
+async function loadSession() {
+    try {
+        const { data } = await api.get('/auth/me');
+        sessionUser.value = data.data;
+    } catch {
+        sessionUser.value = null;
+    }
+}
+
+async function logout() {
+    loggingOut.value = true;
+    try {
+        await fetch('/logout', {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+            },
+            credentials: 'include',
+        });
+    } finally {
+        window.location.href = '/login';
+    }
+}
+
 onMounted(() => {
     const saved = localStorage.getItem('ipko_dark_mode');
     if (saved === '1') {
         darkMode.value = true;
         document.documentElement.classList.add('dark');
+    }
+    if (document.getElementById('ipko-dashboard')) {
+        loadSession();
     }
 });
 </script>
@@ -34,7 +67,10 @@ onMounted(() => {
                 </div>
                 <div>
                     <p class="text-lg font-bold tracking-tight text-slate-900 dark:text-white">IPKO.ai</p>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">B2B IP Intelligence · Kosovo</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">
+                        <span v-if="sessionUser">{{ sessionUser.name }}</span>
+                        <span v-else>B2B IP Intelligence · Kosovo</span>
+                    </p>
                 </div>
             </a>
 
@@ -49,6 +85,15 @@ onMounted(() => {
                     Dashboard
                 </a>
                 <a
+                    href="/register-business"
+                    class="hidden rounded-lg px-2.5 py-2 text-xs font-medium transition sm:inline-block sm:px-3 sm:text-sm"
+                    :class="active === 'register'
+                        ? 'bg-ipko-50 text-ipko-700 dark:bg-ipko-950 dark:text-ipko-300'
+                        : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'"
+                >
+                    Regjistro
+                </a>
+                <a
                     href="/info"
                     class="rounded-lg px-2.5 py-2 text-xs font-medium transition sm:px-3 sm:text-sm"
                     :class="active === 'info'
@@ -57,6 +102,15 @@ onMounted(() => {
                 >
                     Info
                 </a>
+                <button
+                    v-if="sessionUser"
+                    type="button"
+                    class="hidden rounded-lg border border-slate-200 px-2.5 py-2 text-xs font-medium text-slate-600 transition hover:bg-slate-100 sm:inline-block dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                    :disabled="loggingOut"
+                    @click="logout"
+                >
+                    Dil
+                </button>
                 <button
                     type="button"
                     class="ml-1 rounded-lg border border-slate-200 px-2.5 py-2 text-sm transition hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800"

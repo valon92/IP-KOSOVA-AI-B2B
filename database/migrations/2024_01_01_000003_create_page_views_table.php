@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('page_views', function (Blueprint $table) {
             $table->id();
             $table->foreignId('client_id')->constrained('clients')->cascadeOnDelete();
-            $table->foreignId('company_id')->nullable()->constrained('companies_directory')->nullOnDelete();
+            $table->foreignId('business_id')->nullable()->constrained('businesses')->nullOnDelete();
             $table->string('ip_address', 45);
             $table->string('url_path', 2048);
             $table->string('full_url', 2048)->nullable();
@@ -24,7 +24,7 @@ return new class extends Migration
 
             $table->index(['client_id', 'session_id']);
             $table->index(['client_id', 'ip_address', 'created_at']);
-            $table->index(['client_id', 'company_id']);
+            $table->index(['client_id', 'business_id']);
         });
     }
 

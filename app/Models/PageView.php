@@ -9,7 +9,7 @@ class PageView extends Model
 {
     protected $fillable = [
         'client_id',
-        'company_id',
+        'business_id',
         'ip_address',
         'url_path',
         'full_url',
@@ -29,8 +29,8 @@ class PageView extends Model
         return $this->belongsTo(Client::class);
     }
 
-    public function company(): BelongsTo
+    public function business(): BelongsTo
     {
-        return $this->belongsTo(CompanyDirectory::class, 'company_id');
+        return $this->belongsTo(Business::class);
     }
 }

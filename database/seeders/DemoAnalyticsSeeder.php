@@ -2,11 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Models\Business;
 use App\Models\Client;
-use App\Models\CompanyDirectory;
-use App\Models\IdentifiedLead;
 use App\Models\PageView;
-use App\Services\LeadScoringService;
+use App\Services\Business\BusinessLeadScoringService;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
@@ -16,21 +15,28 @@ class DemoAnalyticsSeeder extends Seeder
     public function run(): void
     {
         $client = Client::first();
+
         if (! $client) {
             return;
         }
 
-        $companies = CompanyDirectory::all();
+        $businesses = Business::with('ipRanges')->active()->get();
         $paths = ['/', '/pricing', '/about', '/contact', '/products', '/checkout', '/blog'];
 
-        foreach ($companies->take(8) as $index => $company) {
-            $ip = $this->sampleIpFromRange($company->ip_range_start, $company->ip_range_end);
+        foreach ($businesses->take(8) as $business) {
+            $range = $business->ipRanges->first();
+
+            if (! $range) {
+                continue;
+            }
+
+            $ip = $this->sampleIpFromRange($range->ip_range_start, $range->ip_range_end);
             $sessionId = Str::uuid()->toString();
 
             foreach (array_slice($paths, 0, rand(2, 5)) as $pathIndex => $path) {
                 PageView::create([
                     'client_id' => $client->id,
-                    'company_id' => $company->id,
+                    'business_id' => $business->id,
                     'ip_address' => $ip,
                     'url_path' => $path,
                     'full_url' => "https://{$client->domain}{$path}",
@@ -44,7 +50,7 @@ class DemoAnalyticsSeeder extends Seeder
                 ]);
             }
 
-            app(LeadScoringService::class)->calculate($client, $company, $ip, $sessionId);
+            app(BusinessLeadScoringService::class)->scoreAndPersist($client, $business, $ip, $sessionId);
         }
     }
 

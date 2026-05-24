@@ -2,6 +2,7 @@
 const year = new Date().getFullYear();
 
 const productLinks = [
+    { label: 'Regjistro biznesin', href: '/register-business' },
     { label: 'Info — Udhëzues A–Z', href: '/info' },
     { label: 'Analytics Dashboard', href: '/dashboard' },
     { label: 'Tracking SDK', href: '/info#tracking-sdk' },
@@ -12,7 +13,7 @@ const productLinks = [
 const platformLinks = [
     { label: 'IP Enrichment', desc: 'Kosovo corporate ranges' },
     { label: 'Live Visitor Feed', desc: 'Real-time B2B signals' },
-    { label: 'Company Directory', desc: 'Banking, retail, gov' },
+    { label: 'Business Registry', desc: 'IP ranges · industries · Kosovo' },
     { label: 'GDPR-Ready', desc: 'B2B data processing' },
 ];
 
@@ -64,7 +65,7 @@ const techStack = [
                             <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
                             <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
                         </span>
-                        Sistemi aktiv · Enrichment &amp; scoring në kohë reale
+                        <a href="/status" class="hover:underline">Sistemi aktiv · Shiko statusin</a>
                     </div>
                 </div>
 
@@ -136,10 +137,10 @@ const techStack = [
                 </p>
                 <nav class="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-slate-500">
                     <a href="/info" class="font-medium text-ipko-600 transition hover:text-ipko-700 dark:text-ipko-400 dark:hover:text-ipko-300">Info</a>
-                    <a href="#" class="transition hover:text-ipko-600 dark:hover:text-ipko-400">Privatësia</a>
-                    <a href="#" class="transition hover:text-ipko-600 dark:hover:text-ipko-400">Kushtet</a>
-                    <a href="#" class="transition hover:text-ipko-600 dark:hover:text-ipko-400">DPA / B2B</a>
-                    <a href="#" class="transition hover:text-ipko-600 dark:hover:text-ipko-400">Status</a>
+                    <a href="/privatesia" class="transition hover:text-ipko-600 dark:hover:text-ipko-400">Privatësia</a>
+                    <a href="/kushtet" class="transition hover:text-ipko-600 dark:hover:text-ipko-400">Kushtet</a>
+                    <a href="/dpa" class="transition hover:text-ipko-600 dark:hover:text-ipko-400">DPA / B2B</a>
+                    <a href="/status" class="transition hover:text-ipko-600 dark:hover:text-ipko-400">Status</a>
                     <a href="mailto:hello@ipko.ai" class="font-medium text-ipko-600 dark:text-ipko-400">hello@ipko.ai</a>
                 </nav>
             </div>

@@ -6,16 +6,16 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\TrackPageViewRequest;
 use App\Models\Client;
 use App\Models\PageView;
-use App\Services\IpEnrichmentService;
-use App\Services\LeadScoringService;
+use App\Services\Business\BusinessLeadScoringService;
+use App\Services\Business\BusinessRegistryService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Str;
 
 class TrackingController extends Controller
 {
     public function __construct(
-        private readonly IpEnrichmentService $ipEnrichment,
-        private readonly LeadScoringService $leadScoring
+        private readonly BusinessRegistryService $businessRegistry,
+        private readonly BusinessLeadScoringService $leadScoring
     ) {}
 
     public function track(TrackPageViewRequest $request): JsonResponse
@@ -33,12 +33,12 @@ class TrackingController extends Controller
             return $this->handlePing($client, $sessionId, $ipAddress, $duration);
         }
 
-        $enrichment = $this->ipEnrichment->resolveWithFallback($ipAddress);
-        $company = $enrichment['company'];
+        $resolution = $this->businessRegistry->resolveWithMeta($ipAddress);
+        $business = $resolution['business'];
 
         $pageView = PageView::create([
             'client_id' => $client->id,
-            'company_id' => $company?->id,
+            'business_id' => $business?->id,
             'ip_address' => $ipAddress,
             'url_path' => Str::limit($urlPath, 500, ''),
             'full_url' => Str::limit($url, 2000, ''),
@@ -49,14 +49,16 @@ class TrackingController extends Controller
             'duration' => $duration,
         ]);
 
-        if ($company) {
-            $this->leadScoring->calculate($client, $company, $ipAddress, $sessionId, $duration);
+        if ($business) {
+            $this->leadScoring->scoreAndPersist($client, $business, $ipAddress, $sessionId, $duration);
         }
 
         return response()->json([
             'success' => true,
             'tracked' => true,
-            'identified' => $enrichment['identified'],
+            'identified' => $resolution['identified'],
+            'business_id' => $business?->id,
+            'business_name' => $business?->name,
             'page_view_id' => $pageView->id,
         ], 201);
     }
@@ -80,17 +82,16 @@ class TrackingController extends Controller
             ]);
         }
 
-        if ($pageView->company_id) {
-            $company = $pageView->company;
-            if ($company) {
-                $this->leadScoring->calculate(
-                    $client,
-                    $company,
-                    $ipAddress,
-                    $sessionId,
-                    $duration
-                );
-            }
+        $business = $pageView->business;
+
+        if ($business) {
+            $this->leadScoring->scoreAndPersist(
+                $client,
+                $business,
+                $ipAddress,
+                $sessionId,
+                $duration
+            );
         }
 
         return response()->json([

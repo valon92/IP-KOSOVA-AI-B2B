@@ -3,75 +3,58 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\IdentifiedLeadResource;
+use App\Http\Resources\BusinessLeadResource;
 use App\Http\Resources\LiveFeedResource;
 use App\Models\Client;
-use App\Models\IdentifiedLead;
-use App\Models\PageView;
-use Carbon\Carbon;
+use App\Services\Business\BusinessAnalyticsService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
+    public function __construct(
+        private readonly BusinessAnalyticsService $analytics
+    ) {}
+
     public function metrics(Request $request): JsonResponse
     {
-        $client = $this->resolveClient($request);
-
-        $totalVisits = PageView::where('client_id', $client->id)->count();
-        $uniqueCompanies = IdentifiedLead::where('client_id', $client->id)
-            ->distinct()
-            ->count('company_id');
-        $avgLeadScore = (float) IdentifiedLead::where('client_id', $client->id)->avg('lead_score') ?: 0;
-        $hotLeads = IdentifiedLead::where('client_id', $client->id)->where('status', 'hot')->count();
-        $conversionRate = $uniqueCompanies > 0
-            ? round(($hotLeads / $uniqueCompanies) * 100, 1)
-            : 0;
+        $client = $this->client($request);
 
         return response()->json([
-            'data' => [
-                'total_visits' => $totalVisits,
-                'unique_companies' => $uniqueCompanies,
-                'average_lead_score' => round($avgLeadScore, 1),
-                'conversion_rate' => $conversionRate,
-            ],
+            'data' => $this->analytics->metricsForClient($client),
         ]);
     }
 
     public function liveFeed(Request $request): JsonResponse
     {
-        $client = $this->resolveClient($request);
-        $since = Carbon::now()->subMinutes(30);
-
-        $leads = IdentifiedLead::query()
-            ->with('company')
-            ->where('client_id', $client->id)
-            ->where('last_active_at', '>=', $since)
-            ->orderByDesc('last_active_at')
-            ->limit(15)
-            ->get();
+        $client = $this->client($request);
+        $leads = $this->analytics->liveLeadsForClient($client);
 
         return response()->json([
             'data' => LiveFeedResource::collection($leads)->resolve(),
         ]);
     }
 
-    public function companies(Request $request): JsonResponse
+    public function businessLeads(Request $request): JsonResponse
     {
-        $client = $this->resolveClient($request);
+        $client = $this->client($request);
+        $leads = $this->analytics->leadsForClient(
+            $client,
+            $request->integer('per_page', 25)
+        );
 
-        $leads = IdentifiedLead::query()
-            ->with('company')
-            ->where('client_id', $client->id)
-            ->orderByDesc('lead_score')
-            ->orderByDesc('last_active_at')
-            ->paginate($request->integer('per_page', 25));
-
-        return IdentifiedLeadResource::collection($leads)->response();
+        return BusinessLeadResource::collection($leads)->response();
     }
 
-    private function resolveClient(Request $request): Client
+    /** @deprecated Use businessLeads — kept for backward compatibility */
+    public function companies(Request $request): JsonResponse
     {
-        return $request->attributes->get('client');
+        return $this->businessLeads($request);
+    }
+
+    private function client(Request $request): Client
+    {
+        return Auth::guard('client')->user();
     }
 }

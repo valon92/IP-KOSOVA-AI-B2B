@@ -5,6 +5,7 @@ const props = defineProps({
         default: () => ({
             total_visits: 0,
             unique_companies: 0,
+            unique_businesses: 0,
             average_lead_score: 0,
             conversion_rate: 0,
         }),
@@ -14,7 +15,7 @@ const props = defineProps({
 
 const cards = [
     { key: 'total_visits', label: 'Total Visits', icon: '👁' },
-    { key: 'unique_companies', label: 'Unique Companies', icon: '🏢' },
+    { key: 'unique_businesses', label: 'Unique Businesses', icon: '🏢', fallback: 'unique_companies' },
     { key: 'average_lead_score', label: 'Avg Lead Score', icon: '⚡' },
     { key: 'conversion_rate', label: 'Conversion Rate', icon: '📈', suffix: '%' },
 ];
@@ -36,7 +37,7 @@ const cards = [
                         v-if="!loading"
                         class="mt-2 text-3xl font-bold tracking-tight text-slate-900 dark:text-white"
                     >
-                        {{ props.metrics?.[card.key] ?? 0 }}{{ card.suffix || '' }}
+                        {{ props.metrics?.[card.key] ?? (card.fallback ? props.metrics?.[card.fallback] : null) ?? 0 }}{{ card.suffix || '' }}
                     </p>
                     <div v-else class="mt-3 h-9 w-24 animate-pulse rounded-lg bg-slate-200 dark:bg-slate-700" />
                 </div>

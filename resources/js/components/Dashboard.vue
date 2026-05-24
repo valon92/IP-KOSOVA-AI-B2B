@@ -3,8 +3,13 @@ import { onMounted, onUnmounted, ref } from 'vue';
 import api from '../api/client';
 import MetricsBar from './MetricsBar.vue';
 import LiveFeed from './LiveFeed.vue';
-import CompaniesTable from './CompaniesTable.vue';
+import BusinessesTable from './BusinessesTable.vue';
+import IndustryBreakdown from './IndustryBreakdown.vue';
+import BusinessRegistryPanel from './BusinessRegistryPanel.vue';
+import BusinessDetailModal from './BusinessDetailModal.vue';
+import { normalizeBusinessLead } from '../composables/useBusinessDisplay';
 import AppFooter from './AppFooter.vue';
+import ScrollToTop from './ScrollToTop.vue';
 import AppHeader from './AppHeader.vue';
 
 const metrics = ref({
@@ -14,7 +19,21 @@ const metrics = ref({
     conversion_rate: 0,
 });
 const liveFeed = ref([]);
-const companies = ref([]);
+const businessLeads = ref([]);
+const industryStats = ref([]);
+const registryBusinesses = ref([]);
+const loadingRegistry = ref(true);
+const detailBusinessId = ref(null);
+const detailOpen = ref(false);
+
+function openBusinessDetail(businessId) {
+    detailBusinessId.value = businessId;
+    detailOpen.value = true;
+}
+
+function closeBusinessDetail() {
+    detailOpen.value = false;
+}
 const loadingMetrics = ref(true);
 const loadingFeed = ref(true);
 const loadingCompanies = ref(true);
@@ -47,21 +66,49 @@ async function fetchLiveFeed() {
     }
 }
 
-async function fetchCompanies() {
+async function fetchBusinessLeads() {
     loadingCompanies.value = true;
     try {
-        const { data } = await api.get('/dashboard/companies', { params: { per_page: 50 } });
-        companies.value = Array.isArray(data?.data) ? data.data : [];
+        const { data } = await api.get('/dashboard/business-leads', { params: { per_page: 50 } });
+        businessLeads.value = Array.isArray(data?.data) ? data.data : [];
+        buildIndustryStats();
     } catch (e) {
-        console.error('[IPKO] Failed to load companies', e);
-        companies.value = [];
+        console.error('[IPKO] Failed to load business leads', e);
+        businessLeads.value = [];
+        industryStats.value = [];
     } finally {
         loadingCompanies.value = false;
     }
 }
 
+function buildIndustryStats() {
+    const map = {};
+    businessLeads.value.forEach((lead) => {
+        const row = normalizeBusinessLead(lead);
+        const key = row.industry;
+        if (!map[key]) {
+            map[key] = { name: row.industry, icon: row.industry_icon ?? '🏢', slug: key, lead_count: 0 };
+        }
+        map[key].lead_count += 1;
+    });
+    industryStats.value = Object.values(map).sort((a, b) => b.lead_count - a.lead_count);
+}
+
+async function fetchRegistry() {
+    loadingRegistry.value = true;
+    try {
+        const { data } = await api.get('/businesses', { params: { per_page: 50, active_only: false } });
+        registryBusinesses.value = Array.isArray(data?.data) ? data.data : [];
+    } catch (e) {
+        console.error('[IPKO] Failed to load registry', e);
+        registryBusinesses.value = [];
+    } finally {
+        loadingRegistry.value = false;
+    }
+}
+
 async function refreshAll() {
-    await Promise.all([fetchMetrics(), fetchLiveFeed(), fetchCompanies()]);
+    await Promise.all([fetchMetrics(), fetchLiveFeed(), fetchBusinessLeads(), fetchRegistry()]);
 }
 
 onMounted(() => {
@@ -94,15 +141,24 @@ onUnmounted(() => {
             <MetricsBar :metrics="metrics" :loading="loadingMetrics" />
 
             <div class="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-3">
-                <div class="order-2 lg:order-1 lg:col-span-1">
+                <div class="order-2 space-y-4 lg:order-1 lg:col-span-1">
                     <LiveFeed :items="liveFeed" :loading="loadingFeed" />
+                    <BusinessRegistryPanel :businesses="registryBusinesses" :loading="loadingRegistry" @open-detail="openBusinessDetail" />
                 </div>
-                <div class="order-1 lg:order-2 lg:col-span-2">
-                    <CompaniesTable :companies="companies" :loading="loadingCompanies" />
+                <div class="order-1 space-y-4 lg:order-2 lg:col-span-2">
+                    <BusinessesTable :leads="businessLeads" :loading="loadingCompanies" @open-detail="openBusinessDetail" />
+                    <IndustryBreakdown :industries="industryStats" :loading="loadingCompanies" />
                 </div>
             </div>
         </main>
 
         <AppFooter />
+        <ScrollToTop />
+
+        <BusinessDetailModal
+            :open="detailOpen"
+            :business-id="detailBusinessId"
+            @close="closeBusinessDetail"
+        />
     </div>
 </template>
