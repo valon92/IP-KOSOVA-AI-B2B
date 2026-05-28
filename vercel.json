@@ -3,7 +3,7 @@
   "version": 2,
   "regions": ["fra1"],
   "buildCommand": "bash scripts/vercel-build.sh",
-  "installCommand": "composer install --no-dev --optimize-autoloader --no-interaction && npm ci",
+  "installCommand": "npm ci",
   "outputDirectory": "public",
   "functions": {
     "api/index.php": {
