@@ -1,0 +1,43 @@
+# Render.com — rekomandohet për Laravel (PHP + Composer në build)
+# Dashboard: https://dashboard.render.com → Blueprint → repo GitHub
+services:
+  - type: web
+    name: ipko-ai
+    runtime: php
+    region: frankfurt
+    plan: free
+    buildCommand: composer install --no-dev --optimize-autoloader && npm ci && npm run build && php artisan config:cache && php artisan route:cache && php artisan view:cache
+    startCommand: php artisan serve --host=0.0.0.0 --port=$PORT
+    healthCheckPath: /api/v1/status
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_URL
+        value: https://ipko.ai
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: SESSION_DRIVER
+        value: database
+      - key: SESSION_SECURE_COOKIE
+        value: true
+      - key: CACHE_DRIVER
+        value: array
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: SANCTUM_STATEFUL_DOMAINS
+        value: ipko.ai,www.ipko.ai
+      - key: APP_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ipko-db
+          property: connectionString
+
+databases:
+  - name: ipko-db
+    region: frankfurt
+    plan: free
+    databaseName: ipko
+    user: ipko

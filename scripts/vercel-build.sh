@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
+# Vercel build step — Composer runs in GitHub Actions before deploy.
+# Local / preview without vendor: only frontend build.
 set -euo pipefail
 
-echo "→ Installing PHP dependencies…"
-if command -v composer >/dev/null 2>&1; then
-    composer install --no-dev --optimize-autoloader --no-interaction
+if [ -f vendor/autoload.php ]; then
+    echo "→ Vendor present (CI prebuilt)"
 else
-    curl -sS https://getcomposer.org/installer | php -- --quiet
-    php composer.phar install --no-dev --optimize-autoloader --no-interaction
-    rm -f composer.phar
+    echo "⚠ vendor/ missing — run composer install locally or use GitHub Actions deploy"
 fi
 
 echo "→ Building frontend assets…"
@@ -18,14 +17,11 @@ if [ -z "${APP_KEY:-}" ]; then
     exit 0
 fi
 
-echo "→ Caching Laravel…"
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
-
-if [ -n "${DATABASE_URL:-}" ]; then
-    echo "→ Running migrations…"
-    php artisan migrate --force --no-interaction
+if [ -f vendor/autoload.php ]; then
+    echo "→ Caching Laravel…"
+    php artisan config:cache || true
+    php artisan route:cache || true
+    php artisan view:cache || true
 fi
 
-echo "✓ Vercel build complete"
+echo "✓ Build complete"
