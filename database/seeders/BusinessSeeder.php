@@ -79,15 +79,6 @@ class BusinessSeeder extends Seeder
                 'website' => 'https://www.keds-energy.com',
             ],
             [
-                'ip_start' => '185.132.47.0',
-                'ip_end' => '185.132.47.63',
-                'name' => 'IPKO Telecommunications',
-                'industry' => 'telekomunikacion',
-                'city' => 'Prishtinë',
-                'size_band' => '500+',
-                'website' => 'https://www.ipko.com',
-            ],
-            [
                 'ip_start' => '185.132.48.0',
                 'ip_end' => '185.132.48.255',
                 'name' => 'Viva Fresh Store',
