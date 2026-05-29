@@ -1,18 +1,14 @@
 <?php
 
 /**
- * Vercel serverless entry — routes all dynamic requests through Laravel.
- * @see https://github.com/vercel-community/php
+ * Vercel serverless entry — delegates to Laravel's public front controller.
+ * @see https://github.com/juicyfx/vercel-examples/tree/master/php-laravel
  */
 
-require __DIR__.'/../vendor/autoload.php';
+// Vercel routes everything through /api/index.php; align path info with Laravel routes.
+if (isset($_SERVER['SCRIPT_NAME']) && str_starts_with($_SERVER['SCRIPT_NAME'], '/api/')) {
+    $_SERVER['SCRIPT_NAME'] = '/index.php';
+    $_SERVER['SCRIPT_FILENAME'] = __DIR__.'/../public/index.php';
+}
 
-$app = require_once __DIR__.'/../bootstrap/app.php';
-
-$kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
-
-$request = Illuminate\Http\Request::capture();
-$response = $kernel->handle($request);
-$response->send();
-
-$kernel->terminate($request, $response);
+require __DIR__.'/../public/index.php';

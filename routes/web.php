@@ -6,7 +6,7 @@ use App\Http\Controllers\ClientAuthController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return redirect('/dashboard');
+    return redirect('/login');
 });
 
 Route::middleware('guest:client')->group(function () {

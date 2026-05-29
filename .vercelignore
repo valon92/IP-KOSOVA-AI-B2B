@@ -1,0 +1,12 @@
+# Laravel: vendor is gitignored but required on Vercel serverless
+!vendor
+!vendor/**
+
+# Dev / local only
+.env
+.env.*
+!.env.example
+database/*.sqlite*
+.phpunit.cache
+tests
+node_modules/.cache

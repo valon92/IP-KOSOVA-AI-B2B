@@ -85,3 +85,18 @@ git push origin main   # trigger GitHub Action
 - Tracker: `data-endpoint="https://ipko.ai/api/v1/track"`
 
 Projekti Vercel: [vercel.com/valon-sylejmanis-projects/ipko-ai](https://vercel.com/valon-sylejmanis-projects/ipko-ai)
+
+---
+
+## Troubleshooting — “nuk hapet” në telefon / Wi‑Fi tjetër
+
+| Simptoma | Shkaku | Zgjidhja |
+|----------|--------|----------|
+| `ERR_INVALID_URL` | Shkruar **`htpps://`** (gabim) | Duhet **`https://`** → `https://ipko.ai/login` |
+| Punon vetëm në Mac / Wi‑Fi shtëpie | Përdoret `http://192.168.x.x:8090` (lokal) | Vetëm publik: `https://ipko.ai/login` |
+| “Can’t find server” | DNS i operatorit i vjetër | Prit 24–48h ose DNS `1.1.1.1` në telefon |
+| Faqe e bardhë | JS/CSS bllokuar | Provo Chrome private tab |
+
+**Namecheap (Advanced DNS):** vetëm A `@` → `76.76.21.21` + CNAME `www` → `cname.vercel-dns.com`. Rekordet **Gmail (MX)** nuk pengojnë faqen. Mos shto URL Redirect për `@` / `www`.
+
+**Test global:** [dnschecker.org/#A/ipko.ai](https://dnschecker.org/#A/ipko.ai) → `76.76.21.21` kudo.

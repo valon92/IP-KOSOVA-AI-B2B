@@ -17,11 +17,6 @@ if [ -z "${APP_KEY:-}" ]; then
     exit 0
 fi
 
-if [ -f vendor/autoload.php ]; then
-    echo "→ Caching Laravel…"
-    php artisan config:cache || true
-    php artisan route:cache || true
-    php artisan view:cache || true
-fi
+# Artisan cache requires PHP (not on Vercel Node build image); vercel-php runs composer at deploy time.
 
 echo "✓ Build complete"

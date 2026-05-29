@@ -8,6 +8,8 @@
 .env
 .env.backup
 .env.production
+.env.local
+.env.vercel
 .phpunit.result.cache
 Homestead.json
 Homestead.yaml
@@ -20,3 +22,4 @@ yarn-error.log
 /database/*.sqlite
 /database/*.sqlite-journal
 .vercel
+.env*

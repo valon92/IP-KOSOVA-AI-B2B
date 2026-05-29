@@ -11,6 +11,14 @@
       "maxDuration": 30
     }
   },
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "www.ipko.ai" }],
+      "destination": "https://ipko.ai/:path*",
+      "permanent": true
+    }
+  ],
   "routes": [
     { "src": "/build/(.*)", "dest": "/build/$1" },
     {
@@ -20,6 +28,7 @@
     { "src": "/(.*)", "dest": "/api/index.php" }
   ],
   "env": {
+    "VERCEL": "1",
     "APP_CONFIG_CACHE": "/tmp/config.php",
     "APP_EVENTS_CACHE": "/tmp/events.php",
     "APP_PACKAGES_CACHE": "/tmp/packages.php",
