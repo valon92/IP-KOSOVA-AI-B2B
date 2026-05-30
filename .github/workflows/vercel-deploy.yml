@@ -71,19 +71,19 @@ jobs:
           mkdir -p .vercel
           printf '%s\n' "{\"projectId\":\"${VERCEL_PROJECT_ID}\",\"orgId\":\"${VERCEL_ORG_ID}\",\"projectName\":\"ipko-ai\"}" > .vercel/project.json
 
-      - name: Verify Vercel token (team access)
+      - name: Verify Vercel token
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
           set -e
-          resp=$(curl -s -w "\n%{http_code}" -H "Authorization: Bearer $VERCEL_TOKEN" "https://api.vercel.com/v2/teams/team_kwp91y9o8gmKeeZGGF9V2SMk")
-          code=$(echo "$resp" | tail -1)
-          if [ "$code" != "200" ]; then
-            echo "::error::VERCEL_TOKEN invalid or no access to team. Create new token at vercel.com/account/tokens with FULL ACCOUNT scope, then update GitHub secret VERCEL_TOKEN."
-            echo "API response code: $code"
+          user_code=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $VERCEL_TOKEN" "https://api.vercel.com/v2/user")
+          team_code=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $VERCEL_TOKEN" "https://api.vercel.com/v2/teams/team_kwp91y9o8gmKeeZGGF9V2SMk")
+          echo "user API: $user_code, team API: $team_code"
+          if [ "$user_code" != "200" ] || [ "$team_code" != "200" ]; then
+            echo "::error::VERCEL_TOKEN i pavlefshëm në GitHub Secrets. Lokalisht: bash scripts/setup-github-secrets.sh (pas gh auth login)"
             exit 1
           fi
-          echo "✓ Token can access Vercel team"
+          echo "✓ VERCEL_TOKEN OK"
 
       - name: Deploy to Vercel Production
         env:
