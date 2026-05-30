@@ -71,6 +71,20 @@ jobs:
           mkdir -p .vercel
           printf '%s\n' "{\"projectId\":\"${VERCEL_PROJECT_ID}\",\"orgId\":\"${VERCEL_ORG_ID}\",\"projectName\":\"ipko-ai\"}" > .vercel/project.json
 
+      - name: Verify Vercel token (team access)
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          set -e
+          resp=$(curl -s -w "\n%{http_code}" -H "Authorization: Bearer $VERCEL_TOKEN" "https://api.vercel.com/v2/teams/team_kwp91y9o8gmKeeZGGF9V2SMk")
+          code=$(echo "$resp" | tail -1)
+          if [ "$code" != "200" ]; then
+            echo "::error::VERCEL_TOKEN invalid or no access to team. Create new token at vercel.com/account/tokens with FULL ACCOUNT scope, then update GitHub secret VERCEL_TOKEN."
+            echo "API response code: $code"
+            exit 1
+          fi
+          echo "✓ Token can access Vercel team"
+
       - name: Deploy to Vercel Production
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
@@ -78,7 +92,7 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
           set -e
-          npx --yes vercel@54 deploy --prod --yes --token="$VERCEL_TOKEN"
+          npx --yes vercel@54 deploy --prod --yes --token="$VERCEL_TOKEN" --scope valon-sylejmanis-projects
           echo "✓ Deployed to https://ipko.ai"
 
       - name: Smoke test
