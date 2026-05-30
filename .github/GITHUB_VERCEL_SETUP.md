@@ -24,6 +24,8 @@ Repo: [github.com/valon92/IP-KOSOVA-AI-B2B/settings/secrets/actions](https://git
 
 Pas ruajtjes: **Actions → Deploy to Vercel → Run workflow** ose `git push` në `main`.
 
+**Nëse workflow dështon në ~30s:** shiko hapin *Validate GitHub secrets* — zakonisht mungon `VERCEL_TOKEN`.
+
 ## 3. Vercel — variabla (tashmë të vendosura)
 
 - `DATABASE_URL` (Neon)
