@@ -17,14 +17,16 @@ Repo: [github.com/valon92/IP-KOSOVA-AI-B2B/settings/secrets/actions](https://git
 
 | Secret | Vlera |
 |--------|--------|
-| `VERCEL_TOKEN` | [vercel.com/account/tokens](https://vercel.com/account/tokens) → Create |
+| `VERCEL_TOKEN` | [vercel.com/account/tokens](https://vercel.com/account/tokens) → **Create** → zgjidh **Full Account** (jo Scoped read-only) → kopjo tokenin e plotë |
 | `VERCEL_ORG_ID` | `team_kwp91y9o8gmKeeZGGF9V2SMk` |
 | `VERCEL_PROJECT_ID` | `prj_pYy4u0KYTpIfA2qh9aFRnAIGSvwS` |
 | `APP_KEY` | `base64:f2mDqUcUp2yYAcMuQSR5JyD63odHKDZN3dmIX60pNSA=` |
 
 Pas ruajtjes: **Actions → Deploy to Vercel → Run workflow** ose `git push` në `main`.
 
-**Nëse workflow dështon në ~30s:** shiko hapin *Validate GitHub secrets* — zakonisht mungon `VERCEL_TOKEN`.
+**Nëse workflow dështon në ~30s:** mungon `VERCEL_TOKEN`.
+
+**Nëse dështon te *Deploy to Vercel* (pas 1–2 min):** krijo **token të ri** me **Full Account**, përditëso `VERCEL_TOKEN` në GitHub, **Re-run**.
 
 ## 3. Vercel — variabla (tashmë të vendosura)
 
