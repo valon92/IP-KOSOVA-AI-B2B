@@ -5,6 +5,10 @@ on:
     branches: [main]
   workflow_dispatch:
 
+concurrency:
+  group: vercel-production
+  cancel-in-progress: true
+
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
@@ -32,17 +36,25 @@ jobs:
       - name: Build frontend
         run: npm ci && npm run build
 
-      - name: Cache Laravel (if APP_KEY set)
+      - name: Verify build artifacts
+        run: |
+          test -f vendor/autoload.php
+          test -f public/build/manifest.json
+          test -f api/index.php
+
+      - name: Cache Laravel (optional)
         env:
           APP_KEY: ${{ secrets.APP_KEY }}
         run: |
           if [ -n "$APP_KEY" ]; then
+            export APP_ENV=production
+            export APP_DEBUG=false
             php artisan config:cache
             php artisan route:cache
             php artisan view:cache
           fi
 
-      - name: Deploy to Vercel
+      - name: Deploy to Vercel Production
         uses: amondnet/vercel-action@v25
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
@@ -50,3 +62,17 @@ jobs:
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
           vercel-args: '--prod'
           working-directory: ./
+
+      - name: Smoke test production URL
+        run: |
+          for i in 1 2 3 4 5; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" https://ipko.ai/login)
+            if [ "$code" = "200" ]; then
+              echo "✓ https://ipko.ai/login → $code"
+              exit 0
+            fi
+            echo "Attempt $i: HTTP $code — waiting…"
+            sleep 15
+          done
+          echo "✗ Production smoke test failed"
+          exit 1

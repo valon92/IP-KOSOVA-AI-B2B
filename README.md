@@ -2,6 +2,9 @@
 
 **IPKO.ai** — B2B IP Reverse Lookup & Geolocation Analytics (MVP)
 
+**Production:** [https://ipko.ai/login](https://ipko.ai/login) · [Vercel](https://vercel.com/valon-sylejmanis-projects/ipko-ai) · [GitHub](https://github.com/valon92/IP-KOSOVA-AI-B2B)  
+**Deploy setup:** [.github/GITHUB_VERCEL_SETUP.md](.github/GITHUB_VERCEL_SETUP.md) — në mobile shkruaj `https://` (jo `htpps://`).
+
 B2B visitor intelligence platform for the Kosovo/Balkan market. Identifies corporate visitors via IP range enrichment, scores leads with an AI-style scoring engine, and surfaces insights in a Vue 3 + Tailwind dashboard.
 
 ## Stack
